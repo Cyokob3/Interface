@@ -12,6 +12,10 @@ class Application(tk.Frame):
         root.geometry("1200x800+100+100")
         self.fname = ''
 
+        #style 
+        style = ttk.Style(self)
+        style.configure("M_STYLE", foreground="#FF0000", background="#00FF00")
+
         self.columnconfigure(1,weight=1)
         self.rowconfigure(3,weight=1) 
         self.pack(fill='both',expand=True)
@@ -23,9 +27,10 @@ class Application(tk.Frame):
         self.menubar_func()
 
     def test(self):
-        frame_test = ttk.Frame(self, height=35, relief='sunken')
+        frame_test = ttk.Frame(self, height=35,)
         frame_test.grid(column=0,row=0,columnspan=2,padx=5,pady=5,sticky='NEW')
-        button_test = ttk.Button(frame_test, text="test")
+        button_test = ttk.Button(frame_test, text="サブメニューバー開設中")
+        button_sort = ttk.Button(frame_test, text="Sort", command=self.textSort)
         button_test.pack()
 
     def file_open_button(self):
@@ -42,6 +47,10 @@ class Application(tk.Frame):
         text.grid(column=1,row=1,rowspan=3,padx=5,sticky='NSEW')
         self.text = text 
         self.text.insert('end',"形態素解析を行うファイルを選択")
+
+    def textSort(self):
+        print("開設中")
+
 
     def main_treeview(self):
         treeview = ttk.Treeview(self)
