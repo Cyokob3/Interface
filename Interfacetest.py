@@ -23,21 +23,23 @@ class Application(tk.Frame):
         self.menubar_func()
 
     def test(self):
-        button_test = ttk.Button(self, text="test")
-        button_test.grid(column=0,row=0,columnspan=2,sticky='NEW')
+        frame_test = ttk.Frame(self, height=35, relief='sunken')
+        frame_test.grid(column=0,row=0,columnspan=2,padx=5,pady=5,sticky='NEW')
+        button_test = ttk.Button(frame_test, text="test")
+        button_test.pack()
 
     def file_open_button(self):
         button_open = ttk.Button(self, text="Open file",command=self.fileOpen)
-        button_open.grid(column=0,row=1,padx=5,pady=5,sticky='N')
+        button_open.grid(column=0,row=1,padx=5,sticky='N')
 
     def file_seve_button(self):
         button_seve = ttk.Button(self, text="Seve as",command=self.fileSave)
-        button_seve.grid(column=0,row=2,sticky='N')
+        button_seve.grid(column=0,row=2,pady=5,sticky='N')
 
     def main_textbox(self):
         text = tk.scrolledtext.ScrolledText(self,wrap='none',undo=True,bg='#e0ffff')
         text.configure(font=(18))
-        text.grid(column=1,row=1,rowspan=3,padx=5,pady=5,sticky='NSEW')
+        text.grid(column=1,row=1,rowspan=3,padx=5,sticky='NSEW')
         self.text = text 
         self.text.insert('end',"形態素解析を行うファイルを選択")
 
