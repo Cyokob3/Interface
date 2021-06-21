@@ -11,10 +11,7 @@ class Application(tk.Frame):
         root.title("MorphologicalAnalysis")
         root.geometry("1200x800+100+100")
         self.fname = ''
-
-        #style 
-        style = ttk.Style(self)
-        style.configure("M_STYLE", foreground="#FF0000", background="#00FF00")
+        status = 'default'
 
         self.columnconfigure(1,weight=1)
         self.rowconfigure(3,weight=1) 
@@ -48,7 +45,7 @@ class Application(tk.Frame):
         self.text = text 
         self.text.insert('end',"形態素解析を行うファイルを選択")
 
-    def textSort(self):
+    def textSort(self): 
         print("開設中")
 
 
@@ -91,6 +88,7 @@ class Application(tk.Frame):
         print("開設中")
 
     def getText(self):
+        status = 'Get'
         if self.fname == "":
             self.fname = filedialog.askopenfilename()
             if self.fname == '': return
@@ -101,11 +99,11 @@ class Application(tk.Frame):
         self.textDelete()
         for line in lines:
             l = [l.strip() for l in line.split("\t")]
-            mline = m.parse(l[7])
-            #print(line)
+            mline = m.parse(l[5])
             self.text.insert('end',mline)
     
     def textCount(self):
+        status = 'Count'
         l1 = []
         s = (self.text.index("end"))
         wclass = ''
@@ -139,6 +137,9 @@ class Application(tk.Frame):
         self.text.delete('1.0','end')
         for line in lines:
             self.text.insert('end',line)
+            l = [line.strip() for line in line.split("\t")]
+            #print(l[2])
+            print(l)
         self.text.configure(state='disabled')
         root.title('editor - '+self.fname)
 
