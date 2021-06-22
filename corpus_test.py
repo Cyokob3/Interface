@@ -8,15 +8,10 @@ def getcorpus():
     f.close()
     for line in lines:
         l = line.split("\t")
-        i += 1
-        l[1] = str(i)
+        l.pop(1)
         corpus.append(l)
-        time = []
-    time = [(float((corpus[i][2])), corpus[i][1]) for i in range(len(corpus))]
-    sort_time = sorted(time)
-    t1 = [sort_time[i][1] for i in range(len(sort_time))]
-    print(t1)
-            
+    print(sorted(corpus, key=lambda x:float(x[1])))
+    
     
 
 getcorpus()
