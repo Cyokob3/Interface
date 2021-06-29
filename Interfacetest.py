@@ -87,6 +87,8 @@ class Application(tk.Frame):
         menubar.add_cascade(label='Settings',menu=settingsmenu)
         root.config(menu=menubar)
 
+                         
+
     def newCreate(self):
         print("開設中")
 
@@ -133,6 +135,7 @@ class Application(tk.Frame):
 
     def fileOpen(self):
         self.fname = filedialog.askopenfilename()
+        self.corpus = []
         if self.fname == '': return
         f = open(self.fname,'r')
         lines = f.readlines()
@@ -143,11 +146,12 @@ class Application(tk.Frame):
             l.pop(1)
             self.corpus.append(l)
         self.corpus = sorted(self.corpus, key=lambda x:float(x[1]))
+        # self.textOrganize()
         for x in self.corpus:
-            x = '   '.join(x)
+            x = ('{:　<6}  {:　<9}  {:　<9}  {:　<9}  {}'.format(*x))
             self.text.insert('end', x)
-        self.text.configure(state='disabled')
         root.title('editor - '+self.fname)
+        print(self.corpus[0])
 
     def fileSave(self):
         f_type = [('Text', '*.txt')]
@@ -163,9 +167,10 @@ class Application(tk.Frame):
         file_path = filedialog.asksaveasfilename(
             filetypes=f_type)
         if file_path != "":
-           with open(file_path, "w") as f:
-                w = csv.writer(f)
-                w.writerow(self.corpus)
+           with open(file_path, "w", encoding="cp932") as f:
+                for x in self.corpus:
+                    w = csv.writer(f)
+                    w.writerow(x)
         return
  
 root = tk.Tk()
