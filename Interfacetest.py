@@ -4,6 +4,7 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 import collections
 import MeCab
+import csv
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -12,6 +13,7 @@ class Application(tk.Frame):
         root.geometry("1200x800+100+100")
         self.fname = ''
         status = 'default'
+        self.corpus = []
 
         self.columnconfigure(1,weight=1)
         self.rowconfigure(3,weight=1) 
@@ -77,6 +79,7 @@ class Application(tk.Frame):
         filemenu.add_command(label='Get',command=self.getText)
         filemenu.add_command(label='Count',command=self.textCount)
         filemenu.add_command(label='Save',command=self.fileSave)
+        filemenu.add_command(label='CSV',command=self.fileSaveCSV)
         filemenu.add_command(label='New',command=self.createNewWindow)
         filemenu.add_command(label='Delete',command=self.textDelete)
         filemenu.add_command(label='Exit',command=exit)
@@ -136,10 +139,13 @@ class Application(tk.Frame):
         f.close()
         self.text.delete('1.0','end')
         for line in lines:
-            self.text.insert('end',line)
-            l = [line.strip() for line in line.split("\t")]
-            #print(l[2])
-            print(l)
+            l = line.split("\t")
+            l.pop(1)
+            self.corpus.append(l)
+        self.corpus = sorted(self.corpus, key=lambda x:float(x[1]))
+        for x in self.corpus:
+            x = '   '.join(x)
+            self.text.insert('end', x)
         self.text.configure(state='disabled')
         root.title('editor - '+self.fname)
 
@@ -152,6 +158,15 @@ class Application(tk.Frame):
                 f.write(self.text.get("1.0", "end-1c"))
         return
 
+    def fileSaveCSV(self):
+        f_type = [('CSV', '*.csv')]
+        file_path = filedialog.asksaveasfilename(
+            filetypes=f_type)
+        if file_path != "":
+           with open(file_path, "w") as f:
+                w = csv.writer(f)
+                w.writerow(self.corpus)
+        return
  
 root = tk.Tk()
 app = Application(master=root)   
