@@ -12,6 +12,4 @@ def getcorpus():
         corpus.append(l)
     print(sorted(corpus, key=lambda x:float(x[1])))
     
-    
-
 getcorpus()
