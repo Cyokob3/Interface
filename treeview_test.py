@@ -15,17 +15,15 @@ class Application(tk.Frame):
         status = 'default'
         self.corpus = []
         self.data = []
-
+        # ウィンドウ表示方法の設定
         self.columnconfigure(1,weight=1)
         self.rowconfigure(3,weight=1) 
         self.pack(fill='both',expand=True)
         self.sub_menuber()
         self.main_textbox()
-
+        # style
         self.s = ttk.Style(self)
         self.s.configure('Treeview',background='aliceblue')
-        self.s.configure('TFrame',background='aliceblue')
-        self.s.configure('TButton',background='aliceblue')
 
     def sub_menuber(self):
         frame_menuber = ttk.Frame(self, height=40)
@@ -73,17 +71,23 @@ class Application(tk.Frame):
         self.sub_treeview.heading('テキスト',text='テキスト',anchor='w')
         self.sub_treeview.heading('品詞',text='品詞',anchor='w')
         #grid    
-        self.sub_treeview.grid(column=1,row=1,rowspan=3,padx=5,sticky='NSEW')
+        self.sub_treeview.pack(fill='both',expand=True)
 
     def textDelete(self):
         for i in self.treeview.get_children():
             self.treeview.delete(i)
 
     def getText(self):
+        # ウィンドウを作成
         self.subTreeview()
+
+        #変数初期化
         line_id = 0
         index_id = 0
+        self.corpus = []
         m = MeCab.Tagger("-Osimple")
+
+        # 形態素解析を行う箇所
         for x in self.data:
             convert = m.parse(x[5]).splitlines()
             line_id += 1
@@ -91,6 +95,7 @@ class Application(tk.Frame):
                 convert_split = y.split('\t')
                 convert_split.insert(0, line_id)
                 self.corpus.append(convert_split)
+        #結果を表示する
         for z in self.corpus:
             index_id += 1
             if z[1] == 'EOS': continue
@@ -100,6 +105,7 @@ class Application(tk.Frame):
         self.fname = filedialog.askopenfilename()
         self.data = []
         i = 0
+        sort_target = 2 #２は開始時間になる
         if self.fname == '': return
         f = open(self.fname,'r')
         lines = f.readlines()
@@ -110,8 +116,7 @@ class Application(tk.Frame):
             l.pop(1)
             l.insert(0, i)
             self.data.append(l)
-        self.data = sorted(self.data, key=lambda x:float(x[2]))
-        # self.textOrganize()
+        self.data = sorted(self.data, key=lambda x:float(x[sort_target]))
         i = 0
         for x in self.data:
             i += 1
