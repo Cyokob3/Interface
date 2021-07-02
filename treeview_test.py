@@ -14,23 +14,28 @@ class Application(tk.Frame):
         self.fname = ''
         status = 'default'
         self.corpus = []
+        self.data = []
 
         self.columnconfigure(1,weight=1)
         self.rowconfigure(3,weight=1) 
         self.pack(fill='both',expand=True)
         self.sub_menuber()
         self.main_textbox()
-        self.menubar_func()
+
+        self.s = ttk.Style(self)
+        self.s.configure('Treeview',background='aliceblue')
+        self.s.configure('TFrame',background='aliceblue')
+        self.s.configure('TButton',background='aliceblue')
 
     def sub_menuber(self):
-        frame_menuber = ttk.Frame(self, height=35,)
+        frame_menuber = ttk.Frame(self, height=40)
         frame_menuber.grid(column=0,row=0,columnspan=2,padx=5,pady=5,sticky='NEW')
         button_open = ttk.Button(frame_menuber, text="Open file",command=self.fileOpen)
         button_delete = ttk.Button(frame_menuber, text="Tree delete",command=self.textDelete)
+        button_MeCab = ttk.Button(frame_menuber, text="MeCab",command=self.getText)
         button_open.pack(side='left')
         button_delete.pack(side='left')
-
-
+        button_MeCab.pack(side='left')
 
     def main_textbox(self):
         self.treeview = ttk.Treeview(self)
@@ -53,23 +58,47 @@ class Application(tk.Frame):
         self.treeview.heading('テキスト',text='テキスト',anchor='w')    
         self.treeview.grid(column=1,row=1,rowspan=3,padx=5,sticky='NSEW')
 
-    def textSort(self): 
-        print("開設中")
-
-    def menubar_func(self):
-        menubar = tk.Menu(root)
-        filemenu = tk.Menu(menubar,tearoff=0)
-        settingsmenu = tk.Menu(menubar,tearoff=0)
-        filemenu.add_command(label='Open',command=self.fileOpen)
-        root.config(menu=menubar)
+    def subTreeview(self):
+        subWindow = tk.Toplevel()
+        self.sub_treeview = ttk.Treeview(subWindow)
+        self.sub_treeview['columns'] = ('id','テキスト','品詞')
+        #column
+        self.sub_treeview.column('#0',width=0, stretch='no')
+        self.sub_treeview.column('id', anchor='w',width=50,stretch=False)
+        self.sub_treeview.column('テキスト', anchor='w',width=200,stretch=False)
+        self.sub_treeview.column('品詞',anchor='w')
+        #heading
+        self.sub_treeview.heading('#0',text='Label',anchor='w')
+        self.sub_treeview.heading('id',text='ID',anchor='w')
+        self.sub_treeview.heading('テキスト',text='テキスト',anchor='w')
+        self.sub_treeview.heading('品詞',text='品詞',anchor='w')
+        #grid    
+        self.sub_treeview.grid(column=1,row=1,rowspan=3,padx=5,sticky='NSEW')
 
     def textDelete(self):
         for i in self.treeview.get_children():
             self.treeview.delete(i)
 
+    def getText(self):
+        self.subTreeview()
+        line_id = 0
+        index_id = 0
+        m = MeCab.Tagger("-Osimple")
+        for x in self.data:
+            convert = m.parse(x[5]).splitlines()
+            line_id += 1
+            for y in convert:
+                convert_split = y.split('\t')
+                convert_split.insert(0, line_id)
+                self.corpus.append(convert_split)
+        for z in self.corpus:
+            index_id += 1
+            if z[1] == 'EOS': continue
+            self.sub_treeview.insert(parent='', index='end', iid=index_id ,values=(z))
+
     def fileOpen(self):
         self.fname = filedialog.askopenfilename()
-        self.corpus = []
+        self.data = []
         i = 0
         if self.fname == '': return
         f = open(self.fname,'r')
@@ -80,15 +109,15 @@ class Application(tk.Frame):
             i += 1
             l.pop(1)
             l.insert(0, i)
-            self.corpus.append(l)
-        self.corpus = sorted(self.corpus, key=lambda x:float(x[2]))
+            self.data.append(l)
+        self.data = sorted(self.data, key=lambda x:float(x[2]))
         # self.textOrganize()
         i = 0
-        for x in self.corpus:
+        for x in self.data:
             i += 1
             self.treeview.insert(parent='', index='end', iid=i ,values=(x))
         root.title('editor - '+self.fname)
-        print(self.corpus[0])
+        print(self.data[0])
 
  
 root = tk.Tk()
