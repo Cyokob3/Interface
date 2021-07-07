@@ -9,6 +9,16 @@ import csv
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
+
+        # テキスト
+        self.helptext = []
+        self.helptext += ['これは簡単な形態素解析を行うシステムです']
+        self.helptext += ['テキストデータはアノテーションツールであるELANで作成してください']
+        self.helptext += ['Openfileボタンを押してテキストファイルを選択してください']
+        self.helptext += ['Tree deleteボタンで表示されているテキストを消すことができます']
+        self.helptext += ['MeCabボタンで形態素解析の結果を表示します']
+        self.helptext += ['helpボタンを押すことでいつでもこのテキストを見ることができます']    
+
         root.title("MorphologicalAnalysis")
         root.geometry("1200x800+100+100")
         self.fname = ''
@@ -21,7 +31,7 @@ class Application(tk.Frame):
         self.pack(fill='both',expand=True)
         self.sub_menuber()
         self.main_helptext()
-        self.main_textbox()
+        self.main_treeview()
         # style
         self.s = ttk.Style(self)
         self.s.configure('Treeview',background='aliceblue')
@@ -33,12 +43,16 @@ class Application(tk.Frame):
         frame_menuber.grid(column=0,row=0,padx=5,pady=5,sticky='NEW')
         button_open = ttk.Button(frame_menuber, text="Open file",command=self.fileOpen)
         button_delete = ttk.Button(frame_menuber, text="Tree delete",command=self.textDelete)
-        button_MeCab = ttk.Button(frame_menuber, text="MeCab",command=self.getText)
+        self.button_MeCab = ttk.Button(frame_menuber, text="MeCab",command=self.getText,state='disabled')
+        self.button_CSV = ttk.Button(frame_menuber, text="CSV",command=self.csv_file_save,state='disabled')
+        button_help = ttk.Button(frame_menuber, text="help",command=self.sub_help_text)
         button_open.pack(side='left')
         button_delete.pack(side='left')
-        button_MeCab.pack(side='left')
+        self.button_MeCab.pack(side='left')
+        self.button_CSV.pack(side='left')
+        button_help.pack(side='right')
 
-    def main_textbox(self):
+    def main_treeview(self):
         self.frame_main = ttk.Frame(self)
         self.frame_main.grid(column=0,row=1,padx=5,sticky='NSEW')
         self.treeview = ttk.Treeview(self.frame_main)
@@ -62,18 +76,13 @@ class Application(tk.Frame):
         self.treeview.pack(fill='both',expand=True)
 
     def main_helptext(self):
-        helptext_1 = 'Openfileボタンを押してテキストファイルを選択してください'
-        helptext_2 = 'Tree deleteボタンで表示されているテキストを消すことができます'
-        helptext_3 = 'MeCabボタンで形態素解析の結果を表示します'
+        #フレームを用意
         self.frame_help = tk.Frame(self, bg='white')
         self.frame_help.grid(column=0,row=1,padx=5,sticky='NSEW')
-        label1_frame = tk.Label(self.frame_help, text=helptext_1,bg='white',font=("MSゴシック", "20", "bold"))
-        label2_frame = tk.Label(self.frame_help, text=helptext_2,bg='white',font=("MSゴシック", "20", "bold"))
-        label3_frame = tk.Label(self.frame_help, text=helptext_3,bg='white',font=("MSゴシック", "20", "bold"))
-        label1_frame.pack(side='top',pady=10)
-        label2_frame.pack(side='top')
-        label3_frame.pack(side='top',pady=10)
-
+        # ラベルでテキストを表示
+        for text_id in range(len(self.helptext)):
+            label_help = tk.Label(self.frame_help, text=self.helptext[text_id],bg='white',font=("MSゴシック", "20", "bold"))
+            label_help.pack(side='top',pady=10)
 
     def subTreeview(self):
         subWindow = tk.Toplevel()
@@ -92,6 +101,32 @@ class Application(tk.Frame):
         #grid    
         self.sub_treeview.pack(fill='both',expand=True)
 
+    def subTreeview_count(self):
+        subWindow = tk.Toplevel()
+        self.sub_treeview_count = ttk.Treeview(subWindow)
+        self.sub_treeview_count['columns'] = ('単語','出現数')
+        #column
+        self.sub_treeview_count.column('#0',width=0, stretch='no')
+        self.sub_treeview_count.column('単語', anchor='w',width=100,stretch=False)
+        self.sub_treeview_count.column('出現数',width=100, anchor='w')
+        #heading
+        self.sub_treeview_count.heading('#0',text='Label',anchor='w')
+        self.sub_treeview_count.heading('単語',text='単語',anchor='w')
+        self.sub_treeview_count.heading('出現数',text='出現数',anchor='w')
+        #grid    
+        self.sub_treeview_count.pack(fill='both',expand=True)
+
+    def sub_help_text(self):
+        # サブウィンドウ表示
+        sub_help_window = tk.Toplevel()
+        # フレームを用意
+        self.sub_help_frame = tk.Frame(sub_help_window, bg='white')
+        self.sub_help_frame.pack(fill='both',expand=True)
+        # ラベルでテキストを表示
+        for text_id in range(len(self.helptext)):
+            sub_label_help = tk.Label(self.sub_help_frame, text=self.helptext[text_id],bg='white',font=("MSゴシック", "20", "bold"))
+            sub_label_help.pack(side='top',pady=10)
+
     def textDelete(self):
         # 変数初期化
         self.data = []
@@ -102,9 +137,12 @@ class Application(tk.Frame):
         # ツリービューのアイテムを削除
         for i in self.treeview.get_children():
             self.treeview.delete(i)
+        # MeCabボタンとCSVボタンの状態をdisabledに変更
+        self.button_MeCab['state']='disabled'
+        self.button_CSV['state']='disabled'
     
     def sorted_text(self):
-        sorted(self.data, key=lambda x:float(x[sort_target]))
+        sorted(self.data, key=lambda x:float(x[self.sort_target]))
 
 
     def getText(self):
@@ -112,7 +150,6 @@ class Application(tk.Frame):
         self.stats = 'get'
         # ウィンドウを作成
         self.subTreeview()
-
         #変数初期化
         index_id = 0
         self.corpus = []
@@ -130,13 +167,46 @@ class Application(tk.Frame):
             index_id += 1
             if z[1] == 'EOS': continue
             self.sub_treeview.insert(parent='', index='end', iid=index_id ,values=(z))
+        self.textCount()
+
+    
+    def textCount(self):
+        # 状態
+        self.status = 'Count'
+        # 初期化
+        target_wclass = 'oll'
+        count_collection = []
+        self.count = []
+        i = 0
+        # ウィンドウ作成
+        self.subTreeview_count()
+        #コーパスのリストから単語を取り出す
+        for corpus_element in self.corpus:
+            if 'EOS' in corpus_element[1]: continue
+            if target_wclass in 'oll': 
+                count_collection.append(corpus_element[1])
+            elif target_wclass in corpus_element[2]:
+                count_collection.append(corpus_element[1])
+        # 単語のカウントを行う
+        count_collection = collections.Counter(count_collection)
+        # 結果を表示する
+        for turn in range(len(set(count_collection))):
+            self.count.append(count_collection.most_common()[turn])
+        print(self.count)
+        for insert_data in self.count:
+            i += 1
+            self.sub_treeview_count.insert(parent='', index='end', iid=i ,values=(insert_data))
+
 
     def fileOpen(self):
         self.fname = filedialog.askopenfilename()
         self.data = []
         i = 0
-        sort_target = 2 #２は開始時間になる
+        self.sort_target = 2 #２は開始時間になる
         if self.fname == '': return
+        # MeCabボタンとCSVボタンの状態をnormalに変更
+        self.button_MeCab['state']='normal'
+        self.button_CSV['state']='normal'
         # ツリービューのフレームを全面にする
         self.frame_main.tkraise()
         # 状態の確認
@@ -150,7 +220,7 @@ class Application(tk.Frame):
             l.pop(1)
             l.insert(0, i)
             self.data.append(l)
-        self.data = sorted(self.data, key=lambda x:float(x[sort_target]))
+        self.data = sorted(self.data, key=lambda x:float(x[self.sort_target]))
         i = 0
         for x in self.data:
             i += 1
@@ -158,6 +228,17 @@ class Application(tk.Frame):
         root.title('editor - '+self.fname)
         print(self.data[0])
 
+    def csv_file_save(self):
+        # print(self.data)
+        self.seve_fname = filedialog.asksaveasfilename(
+            title='CSVファイルの保存',
+            initialdir='./',
+            initialfile='Unfiled',
+            defaultextension='csv'
+            )
+        with open(self.seve_fname,encoding="cp932",mode='w') as f:
+            writer = csv.writer(f)
+            writer.writerows(self.data)
  
 root = tk.Tk()
 app = Application(master=root)   
