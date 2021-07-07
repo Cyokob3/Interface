@@ -9,16 +9,6 @@ import csv
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
-
-        # テキスト
-        self.helptext = []
-        self.helptext += ['これは簡単な形態素解析を行うシステムです']
-        self.helptext += ['テキストデータはアノテーションツールであるELANで作成してください']
-        self.helptext += ['Openfileボタンを押してテキストファイルを選択してください']
-        self.helptext += ['Tree deleteボタンで表示されているテキストを消すことができます']
-        self.helptext += ['MeCabボタンで形態素解析の結果を表示します']
-        self.helptext += ['helpボタンを押すことでいつでもこのテキストを見ることができます']    
-
         root.title("MorphologicalAnalysis")
         root.geometry("1200x800+100+100")
         self.fname = ''
@@ -31,7 +21,7 @@ class Application(tk.Frame):
         self.pack(fill='both',expand=True)
         self.sub_menuber()
         self.main_helptext()
-        self.main_treeview()
+        self.main_textbox()
         # style
         self.s = ttk.Style(self)
         self.s.configure('Treeview',background='aliceblue')
@@ -43,16 +33,12 @@ class Application(tk.Frame):
         frame_menuber.grid(column=0,row=0,padx=5,pady=5,sticky='NEW')
         button_open = ttk.Button(frame_menuber, text="Open file",command=self.fileOpen)
         button_delete = ttk.Button(frame_menuber, text="Tree delete",command=self.textDelete)
-        self.button_MeCab = ttk.Button(frame_menuber, text="MeCab",command=self.getText,state='disabled')
-        self.button_CSV = ttk.Button(frame_menuber, text="CSV",command=self.csv_file_save,state='disabled')
-        button_help = ttk.Button(frame_menuber, text="help",command=self.sub_help_text)
+        button_MeCab = ttk.Button(frame_menuber, text="MeCab",command=self.getText)
         button_open.pack(side='left')
         button_delete.pack(side='left')
-        self.button_MeCab.pack(side='left')
-        self.button_CSV.pack(side='left')
-        button_help.pack(side='right')
+        button_MeCab.pack(side='left')
 
-    def main_treeview(self):
+    def main_textbox(self):
         self.frame_main = ttk.Frame(self)
         self.frame_main.grid(column=0,row=1,padx=5,sticky='NSEW')
         self.treeview = ttk.Treeview(self.frame_main)
@@ -76,13 +62,18 @@ class Application(tk.Frame):
         self.treeview.pack(fill='both',expand=True)
 
     def main_helptext(self):
-        #フレームを用意
+        helptext_1 = 'Openfileボタンを押してテキストファイルを選択してください'
+        helptext_2 = 'Tree deleteボタンで表示されているテキストを消すことができます'
+        helptext_3 = 'MeCabボタンで形態素解析の結果を表示します'
         self.frame_help = tk.Frame(self, bg='white')
         self.frame_help.grid(column=0,row=1,padx=5,sticky='NSEW')
-        # ラベルでテキストを表示
-        for text_id in range(len(self.helptext)):
-            label_help = tk.Label(self.frame_help, text=self.helptext[text_id],bg='white',font=("MSゴシック", "20", "bold"))
-            label_help.pack(side='top',pady=10)
+        label1_frame = tk.Label(self.frame_help, text=helptext_1,bg='white',font=("MSゴシック", "20", "bold"))
+        label2_frame = tk.Label(self.frame_help, text=helptext_2,bg='white',font=("MSゴシック", "20", "bold"))
+        label3_frame = tk.Label(self.frame_help, text=helptext_3,bg='white',font=("MSゴシック", "20", "bold"))
+        label1_frame.pack(side='top',pady=10)
+        label2_frame.pack(side='top')
+        label3_frame.pack(side='top',pady=10)
+
 
     def subTreeview(self):
         subWindow = tk.Toplevel()
@@ -101,17 +92,6 @@ class Application(tk.Frame):
         #grid    
         self.sub_treeview.pack(fill='both',expand=True)
 
-    def sub_help_text(self):
-        # サブウィンドウ表示
-        sub_help_window = tk.Toplevel()
-        # フレームを用意
-        self.sub_help_frame = tk.Frame(sub_help_window, bg='white')
-        self.sub_help_frame.pack(fill='both',expand=True)
-        # ラベルでテキストを表示
-        for text_id in range(len(self.helptext)):
-            sub_label_help = tk.Label(self.sub_help_frame, text=self.helptext[text_id],bg='white',font=("MSゴシック", "20", "bold"))
-            sub_label_help.pack(side='top',pady=10)
-
     def textDelete(self):
         # 変数初期化
         self.data = []
@@ -122,9 +102,6 @@ class Application(tk.Frame):
         # ツリービューのアイテムを削除
         for i in self.treeview.get_children():
             self.treeview.delete(i)
-        # MeCabボタンとCSVボタンの状態をdisabledに変更
-        self.button_MeCab['state']='disabled'
-        self.button_CSV['state']='disabled'
     
     def sorted_text(self):
         sorted(self.data, key=lambda x:float(x[sort_target]))
@@ -160,9 +137,6 @@ class Application(tk.Frame):
         i = 0
         sort_target = 2 #２は開始時間になる
         if self.fname == '': return
-        # MeCabボタンとCSVボタンの状態をnormalに変更
-        self.button_MeCab['state']='normal'
-        self.button_CSV['state']='normal'
         # ツリービューのフレームを全面にする
         self.frame_main.tkraise()
         # 状態の確認
@@ -184,17 +158,6 @@ class Application(tk.Frame):
         root.title('editor - '+self.fname)
         print(self.data[0])
 
-    def csv_file_save(self):
-        # print(self.data)
-        self.seve_fname = filedialog.asksaveasfilename(
-            title='CSVファイルの保存',
-            initialdir='./',
-            initialfile='Unfiled',
-            defaultextension='csv'
-            )
-        with open(self.seve_fname,encoding="cp932",mode='w') as f:
-            writer = csv.writer(f)
-            writer.writerows(self.data)
  
 root = tk.Tk()
 app = Application(master=root)   
